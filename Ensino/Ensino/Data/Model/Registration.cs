@@ -12,15 +12,22 @@ namespace Ensino.Data.Model
     [PrimaryKey(nameof(StudentFK), nameof(CourseFK))]
     public class Registration{
 
+        [Display(Name = "Data de Registo")]
+        [DataType(DataType.DateTime)]
         public DateTime RegistrationDate { get; set; }
 
         //FK para student
-        [Key]
+        [ForeignKey(nameof(Student))]
+        [Display(Name = "Nº de aluno")]
+        [Required(ErrorMessage = "{0} é obrigatório(a)")]
         public int StudentFK { get; set; }
         public Student Student { get; set; } = null!;
 
         //FK para Course
-        [Key]
+        //[Key] na versão antiga
+        [ForeignKey(nameof(Course))]
+        [Display(Name = "Curso")]
+        [Required(ErrorMessage = "{0} é obrigatório(a)")]
         public int CourseFK { get; set; }
         public Course Course { get; set; } = null!;
 
