@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;                       // <-- FALTAVA ESTE (para Path, FileStream, Directory)
+using Microsoft.AspNetCore.Http;       // <-- FALTAVA ESTE (para IFormFile)
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Hosting;
 using Ensino.Data;
 using Ensino.Data.Model;
 
@@ -12,94 +15,71 @@ namespace Ensino.Pages.Degrees
 {
     public class CreateModel : PageModel
     {
-        /// <summary>
-        /// Base de dados do projeto, injetada via construtor
-        /// </summary>
         private readonly Ensino.Data.ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public CreateModel(Ensino.Data.ApplicationDbContext context)
+        public CreateModel(Ensino.Data.ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
         {
-            IWebHostEnvironment webHostEnvironment;
             _context = context;
             _webHostEnvironment = webHostEnvironment;
         }
 
-        /// <summary>
-        /// mostrar a página do Create, quando o pedido é feito em HTTP GET
-        /// </summary>
-        /// <returns>Create page</returns>
-        public IActionResult OnGet()
-        {
-            return Page();
-        }
-
-        /// <summary>
-        /// atributo que define o objeto a ser processado na vista(page)
-        /// </summary>
-
         [BindProperty]
         public Degree Degree { get; set; } = default!;
 
-        /// <summary>
-        /// atributo para receber o ficheiro de imagem do curso
-        /// </summary>
-        /// <returns></returns>
         [BindProperty]
-        public IFormFile ImagemLogo { get; set; }
+        public IFormFile ImagemLogo { get; set; } = default!;
 
-        // For more information, see https://aka.ms/RazorPagesCRUD.
+        public IActionResult OnGet() => Page();
 
-        /// <summary>
-        /// Processa o pedido HTTP POST, 
-        /// quando o formulário é submetido, 
-        /// para criar um novo curso na base de dados
-        /// </summary>
-        /// <returns>página de listagem de todos os cursos</returns>
         public async Task<IActionResult> OnPostAsync()
         {
-
-            if(ImagemLogo == null)
+            // 1. Verificação básica
+            if (ImagemLogo == null || ImagemLogo.Length == 0)
             {
-
-            }
-
-            if(ImagemLogo.ContentType != "image/jpg" && ImagemLogo.ContentType != "image/jpeg"){
-
-                ModelState.AddModelError("ImagemLogo", "O ficheiro de imagem deve ser JPEG ou PNG");
-                return Page();
-                
-            }
-
-            var filename = Guid.NewGuid().ToString() + Path.GetExtension(ImagemLogo.FileName);
-
-
-
-            if (!ModelState.IsValid)
-            {
+                ModelState.AddModelError("ImagemLogo", "Por favor, selecione uma imagem.");
                 return Page();
             }
+
+            // 2. Verificação de extensão/tipo
+            var allowedTypes = new[] { "image/jpg", "image/jpeg", "image/png" };
+            if (!allowedTypes.Contains(ImagemLogo.ContentType))
+            {
+                ModelState.AddModelError("ImagemLogo", "Formato inválido. Use JPG ou PNG.");
+                return Page();
+            }
+
+            if (!ModelState.IsValid) return Page();
+
+            // 3. Preparar o ficheiro
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + ImagemLogo.FileName;
+            string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
             try
             {
+                // Criar a pasta se ela não existir
+                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+                // GUARDAR NO DISCO
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await ImagemLogo.CopyToAsync(fileStream);
+                }
+
+                // GUARDAR NA BASE DE DADOS
+                Degree.Logotype = uniqueFileName;
                 _context.Degree.Add(Degree);
                 await _context.SaveChangesAsync();
 
                 return RedirectToPage("./Index");
             }
-            catch (Exception ex){
+            catch (Exception)
+            {
+                // Se der erro ao guardar na BD, apaga a imagem que foi para o disco
+                if (System.IO.File.Exists(filePath)) System.IO.File.Delete(filePath);
 
-                //throw;
-                /*
-                 * se ocorrer um erro ao guardar o curso na base de dados,
-                 * ou na operação de guardar a imagem no disco rigido do servidor,
-                 * devemos tratar o problema
-                 * - registar o erro num ficheiro de log, para que os pro
-                 * - o registo na BD e a imagem devem ser destruídas
-                 * - mostrar uma mensagem de erro ao utilizador
-                 * - devolver o controlo à página do create, para que o utilizador
-                 */
-
-                ModelState.AddModelError(string.Empty, "Ocorreu um erro ao guardar o curso. Tente novamente, por favor");
+                ModelState.AddModelError(string.Empty, "Erro ao processar o registo. Tente novamente.");
                 return Page();
             }
         }
