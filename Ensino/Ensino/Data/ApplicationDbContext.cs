@@ -7,5 +7,6 @@ namespace Ensino.Data
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext(options)
     {
         public DbSet<Ensino.Data.Model.MyUser> MyUser { get; set; } = default!;
+        public DbSet<Ensino.Data.Model.Student> Student { get; set; } = default!;
     }
 }

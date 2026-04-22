@@ -23,13 +23,13 @@ namespace Ensino.Data.Model
         public DateOnly BirthDate { get; set; }
 
 
+        [Display(Name = "Telemóvel")]
         [Required(ErrorMessage = "O número de {0} é obrigatório")]
         [StringLength(17)]
         [RegularExpression(@"\+?[0-9]{9,18}")] //telemóvel em Portugal
         public string CellPhone { get; set; } = "";
 
         [StringLength(50)]
-        [Display(Name = "ID de Utilizador")]
         public string? UserId { get; set; }
 
     }

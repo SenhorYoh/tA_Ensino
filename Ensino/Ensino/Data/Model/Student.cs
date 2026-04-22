@@ -9,7 +9,7 @@ namespace Ensino.Data.Model
     /// </summary>
     public class Student : MyUser{
 
-        [Key]
+        
         [Display(Name = "Nº de Aluno")]
         public int StudentNumber { get; set; }
 
