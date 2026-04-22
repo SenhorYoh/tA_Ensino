@@ -19,11 +19,13 @@ namespace Ensino.Data.Model
         [Display(Name = "Data de nascimento")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
+        [Required(ErrorMessage = "A {0} é de preenchimento obrigatório")]
         public DateOnly BirthDate { get; set; }
 
 
         [Required(ErrorMessage = "O número de {0} é obrigatório")]
         [StringLength(17)]
+        [RegularExpression(@"\+?[0-9]{9,18}")] //telemóvel em Portugal
         public string CellPhone { get; set; } = "";
 
         [StringLength(50)]
