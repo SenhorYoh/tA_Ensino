@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Ensino.Data;
 using Ensino.Data.Model;
+using System.Globalization;
 
 namespace Ensino.Pages.Students
 {
@@ -21,6 +22,7 @@ namespace Ensino.Pages.Students
 
         public IActionResult OnGet()
         {
+            ViewData["DegreeFK"] = new SelectList(_context.Degree, "id", "name");
             return Page();
         }
 
@@ -32,11 +34,22 @@ namespace Ensino.Pages.Students
         {
             if (!ModelState.IsValid)
             {
+                ViewData["DegreeFK"] = new SelectList(_context.Degree.OrderBy(d => d.Name), "id", "name");
                 return Page();
             }
 
-            _context.Student.Add(Student);
-            await _context.SaveChangesAsync();
+            Student.TuitionFee = Convert.ToDecimal(Student.TuitionFeeAux.Replace('.', ','), new CultureInfo("pt-PT"));
+
+            try
+            {
+                _context.Student.Add(Student);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex){
+                throw;
+            }
+
+            
 
             return RedirectToPage("./Index");
         }
