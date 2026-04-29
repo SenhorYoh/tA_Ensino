@@ -26,6 +26,13 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
+                        <li class="nav-item">
+                            @* asp-page indica o caminho dentro da pasta Pages *@
+                            <a class="nav-link text-dark" asp-area="" asp-page="/AppUsers/Index">Utilizadores</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Students/Index">Estudantes</a>
+                        </li>
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>

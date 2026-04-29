@@ -4,6 +4,7 @@ using Ensino.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ensino.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260429092203_AtributodePrecisaoDecimal")]
+    partial class AtributodePrecisaoDecimal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,70 +24,6 @@ namespace Ensino.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CourseProfessor", b =>
-                {
-                    b.Property<int>("ListOfCoursesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ListOfProfessorsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ListOfCoursesId", "ListOfProfessorsId");
-
-                    b.HasIndex("ListOfProfessorsId");
-
-                    b.ToTable("CourseProfessor");
-                });
-
-            modelBuilder.Entity("Ensino.Data.Model.Course", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CurricularYear")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DegreeFK")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<int>("Semester")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Course");
-                });
-
-            modelBuilder.Entity("Ensino.Data.Model.Degree", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Logotype")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Degree");
-                });
 
             modelBuilder.Entity("Ensino.Data.Model.MyUser", b =>
                 {
@@ -104,8 +43,8 @@ namespace Ensino.Data.Migrations
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("nvarchar(13)");
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -123,24 +62,6 @@ namespace Ensino.Data.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("MyUser");
 
                     b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("Ensino.Data.Model.Registration", b =>
-                {
-                    b.Property<int>("StudentFK")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CourseFK")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("RegistrationDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("StudentFK", "CourseFK");
-
-                    b.HasIndex("CourseFK");
-
-                    b.ToTable("Registration");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -345,13 +266,6 @@ namespace Ensino.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Ensino.Data.Model.Professor", b =>
-                {
-                    b.HasBaseType("Ensino.Data.Model.MyUser");
-
-                    b.HasDiscriminator().HasValue("Professor");
-                });
-
             modelBuilder.Entity("Ensino.Data.Model.Student", b =>
                 {
                     b.HasBaseType("Ensino.Data.Model.MyUser");
@@ -370,40 +284,6 @@ namespace Ensino.Data.Migrations
                         .HasColumnType("decimal(9,2)");
 
                     b.HasDiscriminator().HasValue("Student");
-                });
-
-            modelBuilder.Entity("CourseProfessor", b =>
-                {
-                    b.HasOne("Ensino.Data.Model.Course", null)
-                        .WithMany()
-                        .HasForeignKey("ListOfCoursesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Ensino.Data.Model.Professor", null)
-                        .WithMany()
-                        .HasForeignKey("ListOfProfessorsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Ensino.Data.Model.Registration", b =>
-                {
-                    b.HasOne("Ensino.Data.Model.Course", "Course")
-                        .WithMany("ListOfRegistrations")
-                        .HasForeignKey("CourseFK")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Ensino.Data.Model.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentFK")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -455,11 +335,6 @@ namespace Ensino.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Ensino.Data.Model.Course", b =>
-                {
-                    b.Navigation("ListOfRegistrations");
                 });
 #pragma warning restore 612, 618
         }
